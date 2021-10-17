@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=
+    , initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <button onclick="cool(this)">SUper cool</button>
+</body>
+
+</html>
+<header>
+
+    <div class="cool">
+
+        <div class="banane">
+
+            <div>
+                <div>
+                    <div class="arslan"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<script>
+    function cool(el) {
+        console.log(el, 'cool');
+        document.querySelector('.cool').classList.add('opened');
+    }
+</script>
+
+<style>
+    .cool,
+    .banane {
+        width: 100%;
+        height: 30px;
+        padding: 20px;
+    }
+    
+    .cool {
+        background-color: red;
+    }
+    
+    .arslan {
+        visibility: hidden;
+    }
+    
+    .cool.opened * {
+        visibility: initial;
+    }
+    
+    .banane {
+        background-color: blue;
+    }
+    
+    header.menu-opened .arslan {
+        visibility: initial;
+    }
+</style>

@@ -1,0 +1,796 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Test Project #1 API Specifications",
+    "description": "A sample API"
+  },
+  "host": "es2021-tp1.local",
+  "basePath": "/api/v1",
+  "schemes": [
+    "http"
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "security": {
+    "bearerAuth": []
+  },
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/login": {
+      "post": {
+        "description": "Tries to log in a user using credentials\n",
+        "operationId": "login",
+        "parameters": [
+          {
+            "name": "user",
+            "in": "body",
+            "description": "User Credentials",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserCredentials"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logged in user",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "401": {
+            "description": "Wrong credentials",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "default": "Wrong Credentials or user does not exist"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/register": {
+      "post": {
+        "description": "Create a user account\n",
+        "operationId": "register",
+        "parameters": [
+          {
+            "name": "user",
+            "in": "body",
+            "description": "User Credentials",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserRegister"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The created user",
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                }
+              }
+            
+            }
+          },
+          "500": {
+            "description": "Email already used",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "default": "A user with this e-mail already exists"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/user/{userId}/validate": {
+      "put": {
+        "description": "Allows an admin to validate a user account",
+        "operationId": "validate a user account",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "ID of user to validate or not",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "validate",
+            "in": "body",
+            "description": "Whether or not to validate the account",
+            "required": true,
+            "type": "boolean",
+            "example": true,
+            "nullable": "false"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "user response",
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User does not exist",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "default": "User does not exist"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid token / Unsufficient rights error",
+            "schema": {
+              "oneOf": [
+                {"$ref": "#/definitions/InvalidTokenError"},
+                {"$ref": "#/definitions/UnsufficientRightsError"}
+              ]
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/services": {
+      "get": {
+        "description": "Allows everyone to get the services list",
+        "operationId": "get full service list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "service list",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Service"
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Allows a user to add a booking",
+        "operationId": "book a seat",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "body",
+            "description": "Whether or not to validate the account",
+            "required": true,
+            "type": "string",
+            "enum": ["individual", "group"],
+            "nullable": "false"
+          },
+          {
+            "name": "bookings",
+            "in": "body",
+            "description": "Guest list - only if type = 'group'",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/GroupBookingCreation"
+            }
+          },
+          {
+            "name": "tableId",
+            "in": "body",
+            "description": "Table ID - only if type = 'individual'",
+            "required": false,
+            "type": "integer",
+            "default": 12
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "service list",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Service"
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid token / Unsufficient rights error",
+            "schema": {
+              "oneOf": [
+                {"$ref": "#/definitions/InvalidTokenError"},
+                {"$ref": "#/definitions/UnsufficientRightsError"}
+              ]
+            }
+          },
+          "500": {
+            "description": "Too much bookings on a single table",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "default": "Too much bookings on a single table"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unrecognized country code",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "default": "Unrecognized country code"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/admin/services": {
+      "get": {
+        "description": "Allows admin to get the services list with details",
+        "operationId": "get full service list for admins",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "service list",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ServiceWithGuests"
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid token / Unsufficient rights error",
+            "schema": {
+              "oneOf": [
+                {"$ref": "#/definitions/InvalidTokenError"},
+                {"$ref": "#/definitions/UnsufficientRightsError"}
+              ]
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/admin/booking": {
+      "get": {
+        "description": "Allows admin to get the booking list with details",
+        "operationId": "get full booking list for admins",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Optional status filter (if not provided, pending by default)",
+            "required": false,
+            "type": "string",
+            "enum": ["pending", "approved", "denied"]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "booking list",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GuestBooking"
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid token / Unsufficient rights error",
+            "schema": {
+              "oneOf": [
+                {"$ref": "#/definitions/InvalidTokenError"},
+                {"$ref": "#/definitions/UnsufficientRightsError"}
+              ]
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/admin/booking/{bookingId}": {
+      "put": {
+        "description": "Allows admin to change a booking's status",
+        "operationId": "change booking status",
+        "parameters": [
+          {
+            "name": "bookingId",
+            "in": "path",
+            "description": "Booking ID",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "in": "body",
+            "description": "Status",
+            "required": true,
+            "type": "string",
+            "enum": ["approved", "denied"]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Booking status change done",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "success"
+                },
+                "booking": {
+                  "$ref": "#/definitions/GuestBooking"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid token / Unsufficient rights error",
+            "schema": {
+              "oneOf": [
+                {"$ref": "#/definitions/InvalidTokenError"},
+                {"$ref": "#/definitions/UnsufficientRightsError"}
+              ]
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/admin/booking/bulk": {
+      "put": {
+        "description": "Allows admin to change multiple bookings' status",
+        "operationId": "change bulk booking status",
+        "parameters": [
+          {
+            "name": "bookings",
+            "in": "body",
+            "description": "Bookings to approve/decline",
+            "required": true,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["approved", "declined"]
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Booking status change done",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "success"
+                },
+                "bookings": {
+                  "type": "array",
+                  "items":{
+                    "$ref": "#/definitions/GuestBooking"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid token / Unsufficient rights error",
+            "schema": {
+              "oneOf": [
+                {"$ref": "#/definitions/InvalidTokenError"},
+                {"$ref": "#/definitions/UnsufficientRightsError"}
+              ]
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }
+    
+  },
+  "definitions": {
+    "UserCredentials": {
+      "type": "object",
+      "required": [
+        "email",
+        "password"
+      ],
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "User": {
+      "type": "object",
+      "required": [
+        "id",
+        "email",
+        "firstName",
+        "lastName",
+        "accessToken"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "email": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "accessToken": {
+          "type": "string"
+        }
+      }
+    },
+    "UserRegister": {
+      "type": "object",
+      "required": [
+        "email",
+        "firstName",
+        "lastName",
+        "password",
+        "userType"
+      ],
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "countryCode": {
+          "type": "string",
+          "example": "FR"
+        },
+        "password": {
+          "type": "string"
+        },
+        "userType": {
+          "type": "string",
+          "enum": ["singleUser", "countryRepresentative"]
+        }
+      }
+    },
+    "Service": {
+      "type": "object",
+      "required": [
+        "email",
+        "firstName",
+        "lastName",
+        "password",
+        "userType"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string",
+          "default": "BS1"
+        },
+        "competitionDay": {
+          "type": "integer",
+          "enum": [1,2,3,4]
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "tables": {
+          "type": "array",
+          "items" : {
+            "$ref": "#/definitions/Table"
+          }
+        }
+      }
+    },
+    "GuestBooking": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "The booking ID"
+        },
+        "tableId": {
+          "type": "integer"
+        },
+        "groupId": {
+          "type": "integer",
+          "nullable": true
+        },
+        "firstName": {
+          "type": "string",
+          "example": "John"
+        },
+        "lastName": {
+          "type": "string",
+          "example": "Doe"
+        },
+        "memberCountry": {
+          "type": "string",
+          "example": "US"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["approved", "pending", "denied"]
+        }
+      }
+    },
+    "GuestBookingCreate": {
+      "type": "object",
+      "required": [
+        "firstName",
+        "lastName",
+        "memberCountry"
+      ],
+      "properties": {
+        "firstName": {
+          "type": "string",
+          "default": "John"
+        },
+        "lastName": {
+          "type": "string",
+          "default": "Doe"
+        },
+        "memberCountry": {
+          "type": "string",
+          "default": "US"
+        }
+      }
+    },
+    "Table": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "totalSeatCount": {
+          "type": "integer",
+          "default": 4
+        },
+        "freeSeatCount": {
+          "type": "integer",
+          "default": 2
+        }
+      }
+    },
+    "TableWithBookings": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Table"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "bookings": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GuestBooking"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "IndividualBookingCreation": {
+      "type": "object",
+      "properties": {
+        "tableId": {
+          "type": "integer"
+        }
+      }
+    },
+    "GroupBookingCreation": {
+      "type": "object",
+      "properties": {
+        "tables": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "tableId": {
+                "type": "integer"
+              },
+              "guests": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/GuestBookingCreate"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ServiceWithGuests": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/Service"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "tables": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TableWithBookings"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Error": {
+      "type": "object",
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32",
+          "default": 500
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "InvalidTokenError": {
+      "type": "object",
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "message": {
+          "type": "string",
+          "example": "Token invalid, expired or not provided"
+        }
+      }
+    },
+    "UnsufficientRightsError": {
+      "type": "object",
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "message": {
+          "type": "string",
+          "example": "You are not able to perform this action"
+        }
+      }
+    }
+  }
+}
